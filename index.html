@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feito Por Júlio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        *:focus, *:active {
+            outline: none !important;
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Fundo com degradê fluido em movimento contínuo (Cabelo da Merida - ruivo/cobre) */
+        .background-blur-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #000000, #2d0a4e, #4b0082, #000000, #6a0dad, #2d0a4e, #000000);
+            background-size: 400% 400%;
+            filter: blur(60px);
+            animation: moveGradient 12s ease infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes moveGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Container Principal com efeito Backdrop Blur */
+        .player-main-card {
+            width: 100vw;
+            min-height: 100vh;
+            background-color: rgba(18, 18, 18, 0.4); 
+            backdrop-filter: blur(60px);
+            -webkit-backdrop-filter: blur(60px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Container das Partículas de Neve */
+        .snow-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 3;
+            overflow: hidden;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -40px;
+            width: 16px;
+            height: auto;
+            opacity: 0.6;
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(105vh) translateX(40px) rotate(360deg); opacity: 0; }
+        }
+
+        /* Cabeçalho do App */
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px 24px 10px 24px;
+            text-align: center;
+        }
+
+        .header-title-wrapper { flex-grow: 1; }
+        .header-subtitle {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #cccccc;
+            font-weight: 600;
+        }
+
+        /* Botão Verde Flutuante Esquerdo */
+        .floating-green-btn {
+            position: absolute;
+            left: -15px;
+            top: 140px;
+            background-color: #1ed760;
+            width: 60px;
+            height: 45px;
+            border-radius: 0 25px 25px 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            z-index: 10;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+
+        /* Capa do Álbum Centralizada Adaptável */
+        .album-art-container {
+            padding: 10px 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            max-height: 45vh;
+        }
+
+        .album-art-large {
+            height: 100%;
+            max-height: 340px;
+            aspect-ratio: 1 / 1;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        .playing .album-art-large {
+            transform: scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .lyrics-highlight { padding: 20px 24px; }
+        .lyrics-text { font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.3px; }
+
+        .video-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 24px;
+            margin-bottom: 24px;
+            width: fit-content;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        /* Botão Motivo de Hoje */
+        .daily-reason-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #6a0dad, #2d0a4e);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: 24px;
+            margin-bottom: 24px;
+            width: fit-content;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .daily-reason-btn:active { transform: scale(0.95); }
+        .daily-reason-btn .material-icons-round { color: #ff6fae; }
+
+        /* Toast do Motivo de Hoje */
+        .reason-toast {
+            position: fixed;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%) translateY(20px);
+            background: linear-gradient(135deg, #2d0a4e, #000000);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            padding: 16px 22px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 600;
+            max-width: 80vw;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+        }
+        .reason-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Coração ao dar duplo toque na capa */
+        .album-art-container { position: relative; }
+        .burst-heart {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 90px;
+            color: #ff2d6f;
+            pointer-events: none;
+            z-index: 50;
+            text-shadow: 0 0 25px rgba(255, 45, 111, 0.8);
+            animation: heartBurst 0.9s ease forwards;
+        }
+        @keyframes heartBurst {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+            60% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+        }
+
+        .mini-heart {
+            position: fixed;
+            bottom: -30px;
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 2999;
+            animation: floatHeart linear forwards;
+        }
+        @keyframes floatHeart {
+            0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.9; }
+            100% { transform: translateY(-70vh) translateX(var(--drift, 0px)) rotate(25deg); opacity: 0; }
+        }
+
+        /* Informações da Faixa */
+        .track-info-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            margin-bottom: 20px;
+        }
+
+        .track-details { display: flex; flex-direction: column; gap: 2px; }
+        .track-title { font-size: 24px; font-weight: 700; color: #ffffff; }
+        .track-artist { font-size: 16px; color: #cccccc; font-weight: 500; }
+
+        .track-actions-right { display: flex; align-items: center; gap: 18px; }
+        .action-icon { font-size: 30px; color: #ffffff; cursor: pointer; }
+
+        /* Linha do Tempo e Controles interativos */
+        .controls-wrapper { padding: 0 24px; }
+        .progress-container { margin-bottom: 8px; padding: 5px 0; cursor: pointer; }
+        .progress-bar-bg { width: 100%; height: 4px; background-color: rgba(255, 255, 255, 0.2); border-radius: 2px; position: relative; }
+        .progress-bar-fill { width: 0%; height: 100%; background-color: #ffffff; border-radius: 2px; position: relative; }
+        .progress-handle { position: absolute; right: -6px; top: -4px; width: 12px; height: 12px; background-color: #ffffff; border-radius: 50%; opacity: 0; }
+        .progress-container:hover .progress-bar-fill { background-color: #1ed760; }
+        .progress-container:hover .progress-handle { opacity: 1; }
+
+        .time-stamps { display: flex; justify-content: space-between; font-size: 12px; color: #cccccc; font-weight: 500; }
+
+        /* Botões de Mídia Principais */
+        .media-buttons { display: flex; justify-content: space-between; align-items: center; padding: 15px 0 25px 0; }
+        .media-buttons .material-icons-round { font-size: 30px; color: #ffffff; cursor: pointer; user-select: none; }
+        .media-buttons .secondary-btn { color: #cccccc; }
+        .media-buttons .play-pause-btn { width: 64px; height: 64px; background-color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .media-buttons .play-pause-btn .material-icons-round { color: #000000; font-size: 38px; }
+        .play-pause-btn .icon-play { margin-left: 4px; }
+        .play-pause-btn .icon-pause { display: none; }
+
+        .footer-device-row { display: flex; justify-content: space-between; align-items: center; padding: 0 24px; margin-bottom: 20px; }
+        .device-connection { display: flex; align-items: center; gap: 6px; color: #1ed760; font-size: 12px; font-weight: 600; }
+        .device-connection .material-icons-round { font-size: 18px; }
+        .footer-right-actions { display: flex; align-items: center; gap: 20px; color: #cccccc; }
+        .footer-right-actions .material-icons-round { font-size: 22px; cursor: pointer; }
+
+        /* CAIXA DE LETRA SPOTIFY */
+        .lyrics-drawer-container {
+            background-color: #333333;
+            border-radius: 20px;
+            padding: 24px;
+            margin: 0 24px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.32, 0.94, 0.6, 1);
+            position: relative;
+            max-height: 380px;
+            overflow: hidden;
+        }
+
+        .lyrics-drawer-container.expanded {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0; margin: 0; border-radius: 0;
+            max-height: 100vh; height: 100vh; z-index: 999; overflow-y: auto; padding-top: 30px;
+            animation: slideUpLyrics 0.4s cubic-bezier(0.32, 0.94, 0.6, 1) forwards;
+        }
+
+        @keyframes slideUpLyrics { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .lyrics-drawer-header { display: flex; justify-content: space-between; align-items: center; }
+        .lyrics-drawer-title { font-size: 16px; font-weight: 700; color: #ffffff; }
+        .lyrics-header-actions { display: flex; align-items: center; gap: 12px; }
+        .lyrics-btn-pill { background-color: rgba(255, 255, 255, 0.1); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+        .lyrics-body-scroller { display: flex; flex-direction: column; gap: 20px; padding-bottom: 40px; }
+        .lyric-line { font-size: 24px; font-weight: 700; line-height: 1.35; color: rgba(255, 255, 255, 0.45); letter-spacing: -0.6px; transition: color 0.3s ease, transform 0.3s ease; }
+        .lyric-line.active { color: #ffffff; transform: scale(1.02); }
+
+        /* Botão Mini Storys da Gata */
+        .storys-trigger-wrapper { width: 100%; padding: 10px 24px 40px 24px; display: flex; justify-content: center; z-index: 2; }
+        .storys-btn {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff; font-size: 12px; font-weight: 700; padding: 12px 24px; border-radius: 20px;
+            cursor: pointer; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.5px; text-transform: uppercase;
+            transition: background-color 0.25s, transform 0.2s, border-color 0.25s;
+        }
+        .storys-btn:hover { background-color: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.4); transform: scale(1.04); }
+        .storys-btn:active { transform: scale(0.96); }
+
+        /* INTERFACE DOS STORIES */
+        .stories-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .stories-modal.show { display: flex; opacity: 1; }
+
+        .stories-container {
+            position: relative; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
+            transform: scale(0.95); transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .stories-modal.show .stories-container { transform: scale(1); }
+
+        .story-content-item { width: 100%; height: 100%; object-fit: cover; display: none; opacity: 0; }
+        .story-content-item.active { display: block; animation: fadeInStory 0.35s ease forwards; }
+
+        .love-letter-story {
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #2d0a4e 0%, #0a0210 70%, #000000 100%);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            padding: 40px 30px; text-align: center;
+        }
+        .love-letter-story.active { display: flex; animation: fadeInStory 0.35s ease forwards; }
+        .love-letter-icon { font-size: 50px; margin-bottom: 20px; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        .love-letter-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px; font-weight: 800; color: #ff6fae;
+            margin-bottom: 20px;
+        }
+        .love-letter-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 17px; color: #f0f0f0; font-weight: 400; line-height: 1.7;
+            font-style: italic; max-width: 320px;
+        }
+
+        @keyframes fadeInStory { from { opacity: 0; transform: scale(1.02); } to { opacity: 1; transform: scale(1); } }
+
+        .wrapped-end-card {
+            width: 100%; height: 100%;
+            background-color: #121212;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+            padding: 30px; text-align: center; position: relative;
+        }
+        .wrapped-end-card.active { display: flex; animation: fadeInStory 0.35s ease forwards; }
+
+        .wrapped-tag {
+            background-color: #1ed760; color: #000000;
+            font-size: 12px; font-weight: 700; padding: 6px 16px;
+            border-radius: 20px; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 20px;
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .wrapped-title {
+            font-size: 32px; font-weight: 800; color: #ffffff;
+            line-height: 1.2; margin-bottom: 16px; max-width: 320px;
+            letter-spacing: -1px;
+        }
+        .wrapped-title span { color: #1ed760; }
+
+        .wrapped-subtitle {
+            font-size: 15px; color: #aaaaaa; font-weight: 400;
+            line-height: 1.5; margin-bottom: 40px; max-width: 280px;
+        }
+
+        .wrapped-play-btn {
+            background-color: #1ed760; color: #000000;
+            border: none; font-size: 15px; font-weight: 700;
+            padding: 16px 36px; border-radius: 30px; cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 15px rgba(30, 215, 96, 0.3);
+        }
+        .wrapped-play-btn:hover { transform: scale(1.05); background-color: #1fdf64; }
+
+        .stories-modal.fullscreen-game-active .stories-progress-wrapper,
+        .stories-modal.fullscreen-game-active #close-storys-view {
+            display: none !important;
+        }
+
+        /* ESTILOS DO JOGO TERMO ATUALIZADO (MUITO MAIOR E ADAPTADO) */
+        .termo-game-container {
+            display: none; flex-direction: column; align-items: center; justify-content: space-between;
+            width: 100%; height: 100%; 
+            padding: 40px 15px 30px 15px; text-align: center;
+            position: relative;
+            background: linear-gradient(180deg, #05020a 0%, #2d0a4e 50%, #000000 100%);
+            background-size: 200% 200%;
+            animation: moveGameBg 8s ease infinite alternate;
+        }
+        .termo-game-container.active { display: flex; animation: fadeInStory 0.35s ease forwards; }
+
+        @keyframes moveGameBg {
+            0% { background-position: top center; }
+            100% { background-position: bottom center; }
+        }
+
+        .back-from-game-btn {
+            position: absolute; top: 24px; left: 24px;
+            color: rgba(255, 255, 255, 0.6); font-size: 32px;
+            cursor: pointer; transition: color 0.2s; z-index: 2100;
+        }
+
+        .termo-header-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .termo-hint { 
+            font-size: 16px; color: #1ed760; font-weight: 600; 
+            margin-top: 8px; max-width: 320px; line-height: 1.4;
+        }
+        
+        /* Grade do Termo Ampliada para ocupar melhor o espaço vertical */
+        .termo-grid { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            margin: auto 0; 
+            perspective: 1000px;
+        }
+        .termo-row { display: flex; gap: 10px; }
+        .termo-row.shake { animation: shakeRow 0.4s ease; }
+
+        .termo-cell {
+            width: 62px; height: 62px; 
+            border: 2px solid rgba(255, 255, 255, 0.3); 
+            border-radius: 8px;
+            font-size: 32px; font-weight: 800; color: #ffffff; text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center;
+            background-color: rgba(255, 255, 255, 0.03);
+            transition: transform 0.1s ease, border-color 0.1s ease;
+        }
+        
+        /* Animação ao digitar letra */
+        .termo-cell.pop { 
+            animation: cellPop 0.12s ease-out forwards;
+            border-color: rgba(255, 255, 255, 0.7); 
+        }
+
+        @keyframes cellPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
+
+        /* Animação de Revelação das Cores em Flip 3D */
+        .termo-cell.reveal {
+            animation: flipCell 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes flipCell {
+            0% { transform: rotateX(0deg); background: transparent; }
+            45% { transform: rotateX(90deg); background: transparent; }
+            55% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
+        }
+
+        /* Cores de validação */
+        .termo-cell.correct { background: #1db954 !important; border-color: #1db954 !important; }
+        .termo-cell.present { background: #c9b458 !important; border-color: #c9b458 !important; }
+        .termo-cell.absent { background-color: #313132 !important; border-color: #313132 !important; color: rgba(255, 255, 255, 0.4); }
+
+        /* Animação de Pulo da Vitória */
+        .termo-cell.bounce {
+            animation: winBounce 0.5s ease cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        @keyframes winBounce {
+            0%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        /* TECLADO VIRTUAL AMPLIADO E OTIMIZADO */
+        .termo-keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+            padding: 0 4px;
+            margin-top: auto;
+        }
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            width: 100%;
+        }
+        .key {
+            flex: 1;
+            height: 54px;
+            background-color: #4c4c4e;
+            border: none;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            text-transform: uppercase;
+            transition: background-color 0.15s, transform 0.05s;
+        }
+        .key:active {
+            transform: scale(0.95);
+            background-color: #666;
+        }
+        .key.wide {
+            flex: 1.5;
+            font-size: 12px;
+            background-color: #6c6c6e;
+        }
+
+        /* Removido o input catcher fantasma para evitar foco do teclado real */
+        .termo-hidden-input {
+            display: none !important;
+        }
+
+        /* POEMA DA VITÓRIA ACELERADO */
+        .poem-victory-container {
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            width: 100%; height: 100%; 
+            background: radial-gradient(circle at center, #2d0a4e 0%, #0a0210 70%, #000000 100%);
+            padding: 40px 30px; text-align: center; overflow-y: auto;
+            position: relative;
+        }
+        
+        .poem-victory-container.active { 
+            display: flex; 
+            animation: blurFadeIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+        }
+
+        @keyframes blurFadeIn {
+            0% { opacity: 0; filter: blur(10px); transform: scale(0.95); }
+            100% { opacity: 1; filter: blur(0); transform: scale(1); }
+        }
+
+        .poem-title { 
+            font-family: 'Playfair Display', serif;
+            font-size: 36px; font-weight: 800; color: #1ed760; 
+            margin-bottom: 30px; letter-spacing: -0.5px;
+            text-shadow: 0 0 20px rgba(30, 215, 96, 0.4);
+        }
+        
+        .poem-body { 
+            font-family: 'Playfair Display', serif;
+            font-size: 19px; color: #f0f0f0; font-weight: 400; line-height: 1.7; 
+            font-style: italic; max-width: 340px; 
+        }
+        
+        /* Aparecimento acelerado das linhas do poema */
+        .poem-body p {
+            opacity: 0;
+            animation: slideUpLine 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        .poem-body p:nth-child(1) { animation-delay: 0.15s; }
+        .poem-body p:nth-child(2) { animation-delay: 0.3s; }
+        .poem-body p:nth-child(4) { animation-delay: 0.45s; }
+        .poem-body p:nth-child(5) { animation-delay: 0.6s; }
+        .poem-body p:nth-child(7) { animation-delay: 0.75s; }
+        .poem-body p:nth-child(8) { animation-delay: 0.9s; }
+        .poem-body p:nth-child(9) { animation-delay: 1.05s; }
+
+        @keyframes slideUpLine {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Efeito Visual de Pétalas de Ouro Flutuantes na Vitória */
+        .victory-petal {
+            position: absolute;
+            background: linear-gradient(135deg, #ffd700, #ffa500);
+            border-radius: 0 50% 0 50%;
+            pointer-events: none;
+            z-index: 5;
+            animation: petalFall linear forwards;
+        }
+
+        @keyframes petalFall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(110vh) translateX(50px) rotate(720deg); opacity: 0; }
+        }
+
+        @keyframes shakeRow {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        /* Barras superiores e Toques */
+        .stories-progress-wrapper { position: absolute; top: 15px; left: 15px; right: 15px; display: flex; gap: 5px; z-index: 2010; }
+        .story-progress-bg { flex: 1; height: 3px; background-color: rgba(255, 255, 255, 0.3); border-radius: 2px; overflow: hidden; }
+        .story-progress-bar { height: 100%; width: 0%; background-color: #ffffff; }
+
+        .close-stories-btn { position: absolute; top: 32px; right: 20px; color: #ffffff; font-size: 28px; cursor: pointer; z-index: 2020; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .story-touch-left, .story-touch-right { position: absolute; top: 0; width: 35%; height: 100%; z-index: 2015; }
+        .story-touch-left { left: 0; } .story-touch-right { right: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="background-blur-gradient"></div>
+    <div class="snow-container" id="snow-wrapper"></div>
+
+    <audio id="audio-track" src="musica.mp3" preload="metadata"></audio>
+
+    <div class="player-main-card" id="card-wrapper">
+        
+        <div class="player-header">
+            <span class="material-icons-round">expand_more</span>
+            <div class="header-title-wrapper">
+                <div class="header-subtitle">Recomendações para você</div>
+            </div>
+            <span class="material-icons-round">more_vert</span>
+        </div>
+
+        <div class="floating-green-btn">
+            <span class="material-icons-round" style="color: white; font-size: 18px;">more_horiz</span>
+        </div>
+
+        <div class="album-art-container" id="album-art-container">
+            <img class="album-art-large" src="capa.png" alt="Capa do Álbum" id="album-art-img">
+        </div>
+
+        <div class="lyrics-highlight">
+            <p class="lyrics-text" id="top-lyric-highlight">Teus olhos guardam um brilho raro...</p>
+        </div>
+
+        <div class="video-toggle-btn">
+            <span class="material-icons-round">slideshow</span>
+            Mudar para vídeo
+        </div>
+
+        <button class="daily-reason-btn" id="daily-reason-btn">
+            <span class="material-icons-round" style="font-size:16px;">favorite</span>
+            Motivo de hoje
+        </button>
+
+        <div class="track-info-container">
+            <div class="track-details">
+                <div class="track-title">My Love Mine All Mine</div>
+                <div class="artist-wrapper">
+                    <span class="track-artist">Por Júlio/yAshinDev</span>
+                </div>
+            </div>
+            <div class="track-actions-right">
+                <span class="material-icons-round action-icon" style="font-size: 34px; font-weight: 300;">close</span>
+                <span class="material-icons-round action-icon">add_circle_outline</span>
+            </div>
+        </div>
+
+        <div class="controls-wrapper">
+            <div class="progress-container" id="progress-timeline">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill">
+                        <div class="progress-handle"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="time-stamps">
+                <span id="current-time">0:00</span>
+                <span id="total-duration">0:00</span>
+            </div>
+
+            <div class="media-buttons">
+                <span class="material-icons-round secondary-btn">shuffle</span>
+                <span class="material-icons-round">skip_previous</span>
+
+                <div class="play-pause-btn" id="btn-play-pause">
+                    <span class="material-icons-round icon-play" id="play-icon">play_arrow</span>
+                    <span class="material-icons-round icon-pause" id="pause-icon">pause</span>
+                </div>
+                <span class="material-icons-round">skip_next</span>
+                <span class="material-icons-round secondary-btn">repeat</span>
+            </div>
+        </div>
+
+        <div class="footer-device-row">
+            <div class="device-connection">
+                <span class="material-icons-round">speaker_group</span>
+                Conexão com fio
+            </div>
+            <div class="footer-right-actions">
+                <span class="material-icons-round">share</span>
+                <span class="material-icons-round">queue_music</span>
+            </div>
+        </div>
+
+        <div class="lyrics-drawer-container" id="lyrics-drawer">
+            <div class="lyrics-drawer-header">
+                <div class="lyrics-drawer-title">Para a Tete:</div>
+                <div class="lyrics-header-actions">
+                    <div class="lyrics-btn-pill"><span class="material-icons-round" style="color:white;">g_translate</span></div>
+                    <div class="lyrics-btn-pill"><span class="material-icons-round" style="color:white;">share</span></div>
+                    <div class="lyrics-btn-pill" id="close-lyrics-btn">
+                        <span class="material-icons-round" id="expand-icon" style="color:white;">open_in_full</span>
+                    </div>
+                </div>
+            </div>
+            <div class="lyrics-body-scroller" id="lyrics-scroller">
+                <p class="lyric-line active">Teus olhos guardam um brilho raro,</p>
+                <p class="lyric-line">que ilumina até o dia mais nublado.</p>
+                <p class="lyric-line">No teu sorriso mora um verão inteiro,</p>
+                <p class="lyric-line">e cada gesto teu é doce e sincero.</p>
+                <p class="lyric-line">Tua voz é canção que acalma a alma,</p>
+                <p class="lyric-line">tua presença é abrigo, é calma.</p>
+                <p class="lyric-line">Nos teus passos existe uma leveza,</p>
+                <p class="lyric-line">que transforma o mundo em pura beleza.</p>
+                <p class="lyric-line">Tete, és jardim que não murcha no inverno,</p>
+                <p class="lyric-line">és luz que atravessa até o mais eterno.</p>
+                <p class="lyric-line">Teu jeito de olhar conta histórias,</p>
+                <p class="lyric-line">escritas em constelações e memórias.</p>
+                <p class="lyric-line">Tua beleza não cabe em espelho algum,</p>
+                <p class="lyric-line">ela mora no teu riso, no teu ser comum.</p>
+                <p class="lyric-line">É simples, é rara, é verdadeira,</p>
+                <p class="lyric-line">como o sol que nasce em cada manhã inteira.</p>
+                <p class="lyric-line">Cada detalhe teu é obra de arte,</p>
+                <p class="lyric-line">de um jeito que ninguém consegue imitar-te.</p>
+                <p class="lyric-line">Tete, tu és poesia sem precisar de rima,</p>
+                <p class="lyric-line">és a razão que faz o coração subir de estima.</p>
+                <p class="lyric-line">Se o mundo perguntasse o que é ser bela,</p>
+                <p class="lyric-line">eu apontaria pra ti, sem ter cautela.</p>
+                <p class="lyric-line">Pois tua beleza vai além do que se vê,</p>
+                <p class="lyric-line">é luz, é alma, é um jeito de ser você.</p>
+                <p class="lyric-line">Teu abraço é o lugar onde tudo faz sentido,</p>
+                <p class="lyric-line">meu porto seguro, meu canto preferido.</p>
+                <p class="lyric-line">Contigo os dias ficam mais leves e doces,</p>
+                <p class="lyric-line">e cada "eu te amo" nunca é o bastante se eu disser.</p>
+            </div>
+        </div>
+
+        <div class="storys-trigger-wrapper">
+            <button class="storys-btn" id="open-storys-btn">
+                <span class="material-icons-round">history_toggle_off</span>
+                Mini Stories da Gata
+            </button>
+        </div>
+
+    </div>
+
+    <div class="stories-modal" id="stories-modal-view">
+        <div class="stories-container">
+            <div class="stories-progress-wrapper" id="stories-bars-container"></div>
+            <span class="material-icons-round close-stories-btn" id="close-storys-view">close</span>
+            
+            <div class="story-touch-left" id="story-prev"></div>
+            <div class="story-touch-right" id="story-next"></div>
+
+            <img class="story-content-item story-img active" src="story1.png" alt="Story 1">
+            <img class="story-content-item story-img" src="story2.png" alt="Story 2">
+            <div class="story-content-item love-letter-story">
+                <div class="love-letter-icon">💌</div>
+                <h2 class="love-letter-title">Uma cartinha rápida...</h2>
+                <p class="love-letter-text">
+                    Tete, só passando aqui pra lembrar que você é a coisa mais linda que
+                    já aconteceu nos meus dias. Teu jeito, teu olhar, tua franja bagunçando
+                    tudo, teu sorriso que eu quero ver sempre de perto... tudo em você
+                    me faz querer ficar. Obrigado por existir do jeitinho que você é. 💜
+                </p>
+            </div>
+            <img class="story-content-item story-img" id="story3-video" src="story3.png" alt="Story 3">
+
+            <div class="story-content-item wrapped-end-card" id="wrapped-card">
+                <div class="wrapped-tag">Retrospectiva</div>
+                <h1 class="wrapped-title">JulioDev preparou um <span>joguinho divertido</span></h1>
+                <p class="wrapped-subtitle">O papai JC é o melhor né? Admiteeeee. Vai MENGÃO E CR7, SIUUUUUUU!</p>
+                <button class="wrapped-play-btn" id="minigame-action-btn">Jogar MiniGame</button>
+            </div>
+
+            <div class="story-content-item termo-game-container" id="termo-card">
+                <span class="material-icons-round back-from-game-btn" id="back-to-wrapped">arrow_back</span>
+                
+                <div class="termo-header-section">
+                    <div class="wrapped-tag" style="background-color: #c9b458; margin-bottom: 5px;">Termo da Tete</div>
+                    <div class="termo-hint">Dica: Uma das coisas mais lindas em você.</div>
+                </div>
+                
+                <div class="termo-grid" id="termo-grid-board">
+                    <div class="termo-row" data-row="0">
+                        <div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div>
+                    </div>
+                    <div class="termo-row" data-row="1">
+                        <div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div>
+                    </div>
+                    <div class="termo-row" data-row="2">
+                        <div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div>
+                    </div>
+                    <div class="termo-row" data-row="3">
+                        <div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div>
+                    </div>
+                    <div class="termo-row" data-row="4">
+                        <div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div>
+                    </div>
+                    <div class="termo-row" data-row="5">
+                        <div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div><div class="termo-cell"></div>
+                    </div>
+                </div>
+
+                <div class="termo-keyboard" id="virtual-keyboard">
+                    <div class="keyboard-row">
+                        <button class="key" data-key="Q">Q</button><button class="key" data-key="W">W</button><button class="key" data-key="E">E</button><button class="key" data-key="R">R</button><button class="key" data-key="T">T</button><button class="key" data-key="Y">Y</button><button class="key" data-key="U">U</button><button class="key" data-key="I">I</button><button class="key" data-key="O">O</button><button class="key" data-key="P">P</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key" data-key="A">A</button><button class="key" data-key="S">S</button><button class="key" data-key="D">D</button><button class="key" data-key="F">F</button><button class="key" data-key="G">G</button><button class="key" data-key="H">H</button><button class="key" data-key="J">J</button><button class="key" data-key="K">K</button><button class="key" data-key="L">L</button>
+                    </div>
+                    <div class="keyboard-row">
+                        <button class="key wide" data-key="ENTER">ENTER</button>
+                        <button class="key" data-key="Z">Z</button><button class="key" data-key="X">X</button><button class="key" data-key="C">C</button><button class="key" data-key="V">V</button><button class="key" data-key="B">B</button><button class="key" data-key="N">N</button><button class="key" data-key="M">M</button>
+                        <button class="key wide" data-key="BACKSPACE">⌫</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="story-content-item poem-victory-container" id="poem-card">
+                <h2 class="poem-title">Olhos e Olhar ✨</h2>
+                <div class="poem-body">
+                    <p>Há quem procure a luz nas estrelas,</p>
+                    <p>ou a imensidão perdida no mar.</p>
+                    <br>
+                    <p>Mas eu encontrei a mais bela das certezas</p>
+                    <p>bem nos teus olhos, quando param pra me olhar.</p>
+                    <br>
+                    <p>Tua franja cai de um jeito que é só teu,</p>
+                    <p>como cortina leve a guardar teu brilho.</p>
+                    <p>E quando teu olhar encontra o meu e afaga,</p>
+                    <p>é ali que mora o meu maior carinho.</p>
+                    <br>
+                    <p>Teus olhos guardam segredos, mistérios, poesia,</p>
+                    <p>um brilho que acalma e me faz flutuar.</p>
+                    <p>Se o mundo lá fora perder a alegria,</p>
+                    <p>eu volto pro teu olhar, pra me reencontrar.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audio-track');
+        const playPauseBtn = document.getElementById('btn-play-pause');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const cardWrapper = document.getElementById('card-wrapper');
+        
+        const timeline = document.getElementById('progress-timeline');
+        const progressFill = document.getElementById('progress-fill');
+        const currentTimeEl = document.getElementById('current-time');
+        const totalDurationEl = document.getElementById('total-duration');
+        const topLyricHighlight = document.getElementById('top-lyric-highlight');
+
+        const lyricsDrawer = document.getElementById('lyrics-drawer');
+        const expandIcon = document.getElementById('expand-icon');
+        const lyricLines = Array.from(document.querySelectorAll('.lyric-line'));
+        
+        let lyricTimestamps = [];
+        let currentActiveIndex = 0;
+
+        // Neve caipira
+        const snowContainer = document.getElementById('snow-wrapper');
+        const snowImages = [
+            'https://i.postimg.cc/Qx5NbQmK/1000006983-removebg-preview.png'
+        ];
+
+        function createSnowflake() {
+            const snowflake = document.createElement('img');
+            snowflake.src = snowImages[Math.floor(Math.random() * snowImages.length)];
+            snowflake.classList.add('snowflake');
+            snowflake.style.left = `${Math.random() * 100}vw`;
+            const fallDuration = Math.random() * 6 + 8;
+            snowflake.style.animationDuration = `${fallDuration}s`;
+            snowflake.style.width = `${Math.random() * 12 + 16}px`;
+            snowContainer.appendChild(snowflake);
+            setTimeout(() => snowflake.remove(), fallDuration * 1000);
+        }
+        setInterval(createSnowflake, 650);
+
+        // DUPLO TOQUE NA CAPA: explosão de coração + chuvinha de coraçõezinhos
+        const albumArtContainer = document.getElementById('album-art-container');
+        const albumArtImg = document.getElementById('album-art-img');
+
+        function spawnMiniHearts() {
+            const emojis = ['💜', '❤️', '💫'];
+            for (let i = 0; i < 12; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('span');
+                    heart.classList.add('mini-heart');
+                    heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    heart.style.left = `${Math.random() * 100}vw`;
+                    heart.style.setProperty('--drift', `${(Math.random() * 80) - 40}px`);
+                    const duration = Math.random() * 1.5 + 1.8;
+                    heart.style.animationDuration = `${duration}s`;
+                    heart.style.fontSize = `${Math.random() * 10 + 16}px`;
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), duration * 1000);
+                }, i * 60);
+            }
+        }
+
+        function triggerAlbumHeartBurst() {
+            const burst = document.createElement('span');
+            burst.classList.add('burst-heart');
+            burst.textContent = '💜';
+            albumArtContainer.appendChild(burst);
+            setTimeout(() => burst.remove(), 900);
+            spawnMiniHearts();
+        }
+
+        let lastTapTime = 0;
+        albumArtImg.addEventListener('click', () => {
+            const now = Date.now();
+            if (now - lastTapTime < 350) {
+                triggerAlbumHeartBurst();
+            }
+            lastTapTime = now;
+        });
+        albumArtImg.addEventListener('dblclick', triggerAlbumHeartBurst);
+
+        // BOTÃO "MOTIVO DE HOJE"
+        const dailyReasonBtn = document.getElementById('daily-reason-btn');
+        const dailyReasons = [
+            'Porque teu olhar consegue melhorar até o pior dos meus dias.',
+            'Porque sua franja caindo do jeitinho certo já é o suficiente pra eu sorrir.',
+            'Porque teu abraço é o único lugar onde eu quero estar sempre.',
+            'Porque você é a pessoa mais doce que eu já conheci.',
+            'Porque só de pensar em você, meu dia já fica melhor.',
+            'Porque seu sorriso é o meu efeito colateral favorito.',
+            'Porque com você tudo fica mais leve, mais bonito, mais nosso.',
+            'Porque eu escolheria você em qualquer versão da minha vida.',
+            'Porque teus olhos guardam um universo que eu quero explorar pra sempre.',
+            'Porque você é meu motivo de sorrir sem nem precisar de motivo.'
+        ];
+        let lastReasonIndex = -1;
+        function showDailyReason() {
+            let idx;
+            do {
+                idx = Math.floor(Math.random() * dailyReasons.length);
+            } while (idx === lastReasonIndex && dailyReasons.length > 1);
+            lastReasonIndex = idx;
+
+            let toast = document.getElementById('reason-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'reason-toast';
+                toast.classList.add('reason-toast');
+                document.body.appendChild(toast);
+            }
+            toast.textContent = dailyReasons[idx];
+            requestAnimationFrame(() => toast.classList.add('show'));
+            spawnMiniHearts();
+
+            clearTimeout(window._reasonTimeout);
+            window._reasonTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3800);
+        }
+        dailyReasonBtn.addEventListener('click', showDailyReason);
+
+        // LÓGICA DO COMPONENTE STORIES
+        const openStorysBtn = document.getElementById('open-storys-btn');
+        const closeStorysView = document.getElementById('close-storys-view');
+        const storiesModal = document.getElementById('stories-modal-view');
+        const storyImagesCount = 4; 
+        const storyItems = Array.from(document.querySelectorAll('.story-content-item'));
+        const barsContainer = document.getElementById('stories-bars-container');
+        const storyPrev = document.getElementById('story-prev');
+        const storyNext = document.getElementById('story-next');
+        const minigameBtn = document.getElementById('minigame-action-btn');
+        const backToWrappedBtn = document.getElementById('back-to-wrapped');
+        
+        let storyIndex = 0;
+        let storyInterval = null;
+        let storyProgress = 0;
+        const STORY_DURATION = 4000; 
+        const UPDATE_INTERVAL = 40;  
+
+        for(let i = 0; i < storyImagesCount; i++) {
+            const bg = document.createElement('div');
+            bg.classList.add('story-progress-bg');
+            const bar = document.createElement('div');
+            bar.classList.add('story-progress-bar');
+            bg.appendChild(bar);
+            barsContainer.appendChild(bg);
+        }
+        const progressBars = Array.from(document.querySelectorAll('.story-progress-bar'));
+
+        function showStory(index) {
+            if (index < 0 || index >= storyItems.length) return;
+            
+            if (index >= storyImagesCount) {
+                storyPrev.style.display = 'none';
+                storyNext.style.display = 'none';
+            } else {
+                storyPrev.style.display = 'block';
+                storyNext.style.display = 'block';
+            }
+
+            storyItems.forEach(item => item.classList.remove('active'));
+            storyItems[index].classList.add('active');
+            storyIndex = index;
+            storyProgress = 0;
+
+            progressBars.forEach((bar, i) => {
+                if (i < index) bar.style.width = '100%';
+                if (i > index) bar.style.width = '0%';
+            });
+
+            if (index >= storyImagesCount) {
+                clearInterval(storyInterval);
+                barsContainer.style.display = 'none';
+            } else {
+                barsContainer.style.display = 'flex';
+            }
+        }
+
+        function startStoryTimer() {
+            clearInterval(storyInterval);
+            if (storyIndex >= storyImagesCount) return;
+
+            storyInterval = setInterval(() => {
+                storyProgress += (UPDATE_INTERVAL / STORY_DURATION) * 100;
+                if (storyProgress >= 100) {
+                    storyProgress = 100;
+                    progressBars[storyIndex].style.width = '100%';
+                    if (storyIndex < storyImagesCount) {
+                        showStory(storyIndex + 1);
+                        startStoryTimer();
+                    }
+                } else {
+                    progressBars[storyIndex].style.width = `${storyProgress}%`;
+                }
+            }, UPDATE_INTERVAL);
+        }
+
+        function closeStories() {
+            clearInterval(storyInterval);
+            storiesModal.classList.remove('fullscreen-game-active');
+            storiesModal.classList.remove('show');
+            setTimeout(() => {
+                if(!storiesModal.classList.contains('show')) {
+                    storiesModal.style.display = 'none';
+                }
+            }, 300);
+        }
+
+        openStorysBtn.addEventListener('click', () => {
+            storiesModal.style.display = 'flex';
+            setTimeout(() => { storiesModal.classList.add('show'); }, 10);
+            showStory(0);
+            startStoryTimer();
+        });
+
+        closeStorysView.addEventListener('click', closeStories);
+
+        storyNext.addEventListener('click', () => {
+            if (storyIndex < storyImagesCount) {
+                showStory(storyIndex + 1);
+                startStoryTimer();
+            }
+        });
+
+        storyPrev.addEventListener('click', () => {
+            if (storyIndex > 0) {
+                showStory(storyIndex - 1);
+                startStoryTimer();
+            }
+        });
+
+        // MECÂNICA DO TERMO ATUALIZADA (APENAS TECLADO VIRTUAL)
+        const termoCard = document.getElementById('termo-card');
+        const gridBoard = document.getElementById('termo-grid-board');
+        const poemCard = document.getElementById('poem-card');
+        const virtualKeyboard = document.getElementById('virtual-keyboard');
+        
+        const ANSWER_WORD = "OLHOS";
+        let currentAttemptRow = 0;
+        let currentGuessString = "";
+        let gameActive = true;
+
+        minigameBtn.addEventListener('click', () => {
+            document.getElementById('wrapped-card').classList.remove('active');
+            storiesModal.classList.add('fullscreen-game-active');
+            termoCard.classList.add('active');
+            storyIndex = 5; 
+            resetGameGrid();
+        });
+
+        backToWrappedBtn.addEventListener('click', () => {
+            termoCard.classList.remove('active');
+            storiesModal.classList.remove('fullscreen-game-active');
+            document.getElementById('wrapped-card').classList.add('active');
+            storyIndex = 4;
+        });
+
+        function resetGameGrid() {
+            currentAttemptRow = 0;
+            currentGuessString = "";
+            gameActive = true;
+            Array.from(gridBoard.querySelectorAll('.termo-cell')).forEach(c => {
+                c.textContent = "";
+                c.className = "termo-cell";
+                c.style.animationDelay = "0s";
+            });
+        }
+
+        function updateCellsDisplay() {
+            if(!gameActive) return;
+            const currentRowEl = gridBoard.querySelector(`[data-row="${currentAttemptRow}"]`);
+            if(!currentRowEl) return;
+            const cells = currentRowEl.querySelectorAll('.termo-cell');
+            
+            cells.forEach((cell, idx) => {
+                if(currentGuessString[idx]) {
+                    if(cell.textContent !== currentGuessString[idx]) {
+                        cell.textContent = currentGuessString[idx];
+                        cell.classList.add('pop');
+                    }
+                } else {
+                    cell.textContent = "";
+                    cell.classList.remove('pop');
+                }
+            });
+        }
+
+        function handleLetterInput(letter) {
+            if (currentGuessString.length < 5 && gameActive) {
+                currentGuessString += letter;
+                updateCellsDisplay();
+            }
+        }
+
+        function handleBackspace() {
+            if (currentGuessString.length > 0 && gameActive) {
+                currentGuessString = currentGuessString.slice(0, -1);
+                updateCellsDisplay();
+            }
+        }
+
+        function submitGuess() {
+            if(currentGuessString.length < 5 || !gameActive) return;
+
+            gameActive = false; 
+            const currentRowEl = gridBoard.querySelector(`[data-row="${currentAttemptRow}"]`);
+            const cells = currentRowEl.querySelectorAll('.termo-cell');
+
+            let targetLetterCounts = {};
+            for (let char of ANSWER_WORD) {
+                targetLetterCounts[char] = (targetLetterCounts[char] || 0) + 1;
+            }
+
+            let cellStatuses = Array(5).fill('absent');
+
+            cells.forEach((cell, idx) => {
+                const letter = currentGuessString[idx];
+                if(letter === ANSWER_WORD[idx]) {
+                    cellStatuses[idx] = 'correct';
+                    targetLetterCounts[letter]--;
+                }
+            });
+
+            cells.forEach((cell, idx) => {
+                const letter = currentGuessString[idx];
+                if(cellStatuses[idx] !== 'correct') {
+                    if(ANSWER_WORD.includes(letter) && targetLetterCounts[letter] > 0) {
+                        cellStatuses[idx] = 'present';
+                        targetLetterCounts[letter]--;
+                    }
+                }
+            });
+
+            cells.forEach((cell, idx) => {
+                cell.style.animationDelay = `${idx * 150}ms`;
+                cell.classList.add('reveal');
+                
+                setTimeout(() => {
+                    cell.classList.add(cellStatuses[idx]);
+                }, idx * 150 + 250);
+            });
+
+            const isWin = currentGuessString === ANSWER_WORD;
+
+            setTimeout(() => {
+                if(isWin) {
+                    cells.forEach((cell, idx) => {
+                        cell.style.animationDelay = `${idx * 100}ms`;
+                        cell.classList.add('bounce');
+                    });
+
+                    setTimeout(() => {
+                        termoCard.classList.remove('active');
+                        poemCard.classList.add('active');
+                        startVictoryPetals(); 
+                    }, 1500);
+                } else {
+                    currentAttemptRow++;
+                    currentGuessString = "";
+                    gameActive = true;
+                    
+                    if(currentAttemptRow >= 6) {
+                        setTimeout(() => {
+                            currentRowEl.classList.add('shake');
+                            setTimeout(() => {
+                                resetGameGrid();
+                            }, 500);
+                        }, 200);
+                    } else {
+                        currentRowEl.classList.add('shake');
+                        setTimeout(() => currentRowEl.classList.remove('shake'), 400);
+                    }
+                }
+            }, 5 * 150 + 400);
+        }
+
+        // CHUVA DE PÉTALAS DO POEMA
+        function startVictoryPetals() {
+            setInterval(() => {
+                if(!poemCard.classList.contains('active')) return;
+                const petal = document.createElement('div');
+                petal.classList.add('victory-petal');
+                petal.style.left = `${Math.random() * 100}vw`;
+                const size = Math.random() * 8 + 8;
+                petal.style.width = `${size}px`;
+                petal.style.height = `${size * 1.4}px`;
+                const duration = Math.random() * 4 + 4;
+                petal.style.animationDuration = `${duration}s`;
+                poemCard.appendChild(petal);
+                setTimeout(() => petal.remove(), duration * 1000);
+            }, 300);
+        }
+
+        // Cliques no Teclado Virtual
+        virtualKeyboard.addEventListener('click', (e) => {
+            const keyBtn = e.target.closest('.key');
+            if(!keyBtn) return;
+            
+            const keyAction = keyBtn.getAttribute('data-key');
+            if (keyAction === 'ENTER') {
+                submitGuess();
+            } else if (keyAction === 'BACKSPACE') {
+                handleBackspace();
+            } else {
+                handleLetterInput(keyAction);
+            }
+        });
+
+        // REPRODUTOR DE ÁUDIO BASE
+        function computeLyricTimestamps() {
+            const duration = audio.duration;
+            if (!duration || isNaN(duration)) return;
+            lyricTimestamps = lyricLines.map((_, i) => (i / lyricLines.length) * duration);
+        }
+
+        function getActiveIndexForTime(time) {
+            let idx = 0;
+            for (let i = 0; i < lyricTimestamps.length; i++) {
+                if (time >= lyricTimestamps[i]) idx = i;
+                else break;
+            }
+            return idx;
+        }
+
+        function updateLyricsDisplay(activeIndex) {
+            const isExpanded = lyricsDrawer.classList.contains('expanded');
+            if(lyricLines[activeIndex]) {
+                topLyricHighlight.textContent = lyricLines[activeIndex].textContent;
+            }
+            lyricLines.forEach((el, i) => {
+                el.classList.toggle('active', i === activeIndex);
+                if (isExpanded) {
+                    el.style.display = '';
+                } else {
+                    const windowStart = Math.max(0, activeIndex);
+                    const windowEnd = windowStart + 3;
+                    el.style.display = (i >= windowStart && i <= windowEnd) ? '' : 'none';
+                }
+            });
+            if (isExpanded && !audio.paused) {
+                const activeEl = lyricLines[activeIndex];
+                if (activeEl) activeEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        lyricsDrawer.addEventListener('click', (e) => {
+            if (lyricsDrawer.classList.contains('expanded') && e.target.closest('#close-lyrics-btn')) {
+                e.stopPropagation();
+                lyricsDrawer.classList.remove('expanded');
+                expandIcon.textContent = 'open_in_full';
+                updateLyricsDisplay(currentActiveIndex);
+                return;
+            }
+            if (!lyricsDrawer.classList.contains('expanded')) {
+                lyricsDrawer.classList.add('expanded');
+                expandIcon.textContent = 'close';
+                updateLyricsDisplay(currentActiveIndex);
+            }
+        });
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play().catch(err => console.error(err));
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'block';
+                cardWrapper.classList.add('playing');
+            } else {
+                audio.pause();
+                playIcon.style.display = 'block';
+                pauseIcon.style.display = 'none';
+                cardWrapper.classList.remove('playing');
+            }
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (lyricTimestamps.length !== lyricLines.length) computeLyricTimestamps();
+            progressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+            const newIndex = getActiveIndexForTime(audio.currentTime);
+            if (newIndex !== currentActiveIndex) {
+                currentActiveIndex = newIndex;
+                updateLyricsDisplay(currentActiveIndex);
+            }
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            totalDurationEl.textContent = formatTime(audio.duration);
+            computeLyricTimestamps();
+            updateLyricsDisplay(0);
+        });
+
+        if (audio.readyState >= 1) {
+            totalDurationEl.textContent = formatTime(audio.duration);
+            computeLyricTimestamps();
+            updateLyricsDisplay(0);
+        }
+
+        timeline.addEventListener('click', (e) => {
+            audio.currentTime = (e.offsetX / timeline.clientWidth) * audio.duration;
+        });
+    </script>
+</body>
+</html>
